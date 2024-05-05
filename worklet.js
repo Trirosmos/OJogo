@@ -1,16 +1,34 @@
 const Pitchfinder = require("pitchfinder");
 
-const detectPitch = Pitchfinder.AMDF();
+const detectPitch = Pitchfinder.AMDF({
+	sampleRate: sampleRate
+});
+
+const detectTime = 100;
+
+const detectSize = Math.round(sampleRate * (detectTime / 1000))
+
+let buffer = [];
 
 
 class teste extends AudioWorkletProcessor {
+	constructor() {
+		super();
+
+		this.port.onmessage = function (e) {
+			//
+    }
+  }
   process(inputs, outputs, parameters) {
-    const output = outputs[0];
-    output.forEach((channel) => {
-      for (let i = 0; i < channel.length; i++) {
-        channel[i] = (Math.random() * 2 - 1) * 0.1;
-      }
-    });
+		const entrada = Array.from(inputs[0][0]);
+		buffer = buffer.concat(entrada);
+
+		if(buffer.length > detectSize) {
+			let analise = buffer.splice(0, detectSize);
+			this.port.postMessage(detectPitch(Float32Array.from(entrada))); 
+			//this.port.postMessage(detectPitch);
+		}
+
     return true;
   }
 }
