@@ -27,7 +27,7 @@ class teste extends AudioWorkletProcessor {
 
 		for(let x = 0; x < saida[0].length; x++) {
 			saida[0][x] = entrada[x];
-			saida[1][x] = entrada[x];
+			if(saida[1]) saida[1][x] = entrada[x];
 		}
 
 		buffer = buffer.concat(entrada);

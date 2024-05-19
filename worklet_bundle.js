@@ -4,10 +4,10 @@ const Pitchfinder = require("pitchfinder");
 const detectPitch = Pitchfinder.ACF2PLUS({
 	sampleRate: sampleRate,
 	minFrequency: 50,
-	maxFrequency: 3000
+	maxFrequency: 2000
 });
 
-const detectTime = 30;
+const detectTime = 50;
 
 const detectSize = Math.round(sampleRate * (detectTime / 1000))
 
@@ -28,9 +28,7 @@ class teste extends AudioWorkletProcessor {
 
 		for(let x = 0; x < saida[0].length; x++) {
 			saida[0][x] = entrada[x];
-			saida[1][x] = entrada[x];
-			//saida[0][x] = Math.random() * 0.1;
-			//saida[1][x] = Math.random() * 0.1;
+			if(saida[1]) saida[1][x] = entrada[x];
 		}
 
 		buffer = buffer.concat(entrada);
@@ -39,6 +37,8 @@ class teste extends AudioWorkletProcessor {
 			let analise = buffer.splice(0, detectSize);
 
 			for(let x = 0; x < analise.length; x++) {
+				//Apply sine window
+				//I know there are better ones, idgaf, this one is super easy to generate
 				let windowValue = Math.sin((Math.PI / analise.length) * x);
 				analise[x] = windowValue * analise[x];
 			}
