@@ -5,6 +5,19 @@ async function handleSuccess(stream) {
 	await context.audioWorklet.addModule("worklet_bundle.js");
 	const worklet = new AudioWorkletNode(context, "teste");
 	source.connect(worklet);
+
+	const gainNode = context.createGain();
+
+	const compressor = context.createDynamicsCompressor();
+	compressor.threshold.setValueAtTime(-50, context.currentTime);
+	compressor.knee.setValueAtTime(40, context.currentTime);
+	compressor.ratio.setValueAtTime(12, context.currentTime);
+	compressor.attack.setValueAtTime(0, context.currentTime);
+	compressor.release.setValueAtTime(0.25, context.currentTime);
+
+	source.connect(gainNode);
+	gainNode.connect(compressor);
+	compressor.connect(worklet);
 	worklet.connect(context.destination);
 
 	const tela = document.createElement("canvas");
@@ -12,6 +25,19 @@ async function handleSuccess(stream) {
 	tela.height = window.innerHeight;
 	const ctx = tela.getContext("2d");
 
+	const volume = document.createElement("input");
+	volume.type = "range";
+	volume.min = 0;
+	volume.max = 40;
+	volume.value = "1";
+	volume.step = 0.1;
+
+	volume.onchange = function (e) {
+		gainNode.gain.setValueAtTime(Number(e.target.value), context.currentTime);
+		console.log(gainNode);
+	}
+
+	document.body.appendChild(volume);
 	document.body.appendChild(tela);
 
 	const notas = [];
