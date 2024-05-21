@@ -15,9 +15,33 @@ async function handleSuccess(stream) {
 	compressor.attack.setValueAtTime(0, context.currentTime);
 	compressor.release.setValueAtTime(0.25, context.currentTime);
 
+	const notch1 = context.createBiquadFilter();
+	notch1.type = "notch";
+	notch1.frequency.setValueAtTime(60, context.currentTime);
+	notch1.gain.setValueAtTime(-30, context.currentTime);
+	notch1.Q.setValueAtTime(2, context.currentTime);
+
+	const notch2 = context.createBiquadFilter();
+	notch2.type = "notch";
+	notch2.frequency.setValueAtTime(120, context.currentTime);
+	notch2.gain.setValueAtTime(-30, context.currentTime);
+	notch2.Q.setValueAtTime(2, context.currentTime);
+
+	const pa = context.createBiquadFilter();
+	pa.type = "highpass";
+	pa.frequency.setValueAtTime(200, context.currentTime);
+
+	const pb = context.createBiquadFilter();
+	pb.type = "lowpass";
+	pb.frequency.setValueAtTime(2500, context.currentTime);
+
 	source.connect(gainNode);
 	gainNode.connect(compressor);
-	compressor.connect(worklet);
+	compressor.connect(pa);
+	pa.connect(pb);
+	pb.connect(notch1);
+	notch1.connect(notch2);
+	notch2.connect(worklet);
 	worklet.connect(context.destination);
 
 	const tela = document.createElement("canvas");

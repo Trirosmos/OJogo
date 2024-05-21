@@ -2,8 +2,10 @@ const Pitchfinder = require("pitchfinder");
 
 const detectPitch = Pitchfinder.ACF2PLUS({
 	sampleRate: sampleRate,
-	minFrequency: 50,
-	maxFrequency: 2000
+	minFrequency: 100,
+	maxFrequency: 2000,
+	sensitivity: 0.0001,
+	ratio : 5,
 });
 
 const detectTime = 50;
