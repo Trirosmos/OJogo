@@ -19,21 +19,21 @@ async function handleSuccess(stream) {
 	notch1.type = "notch";
 	notch1.frequency.setValueAtTime(60, context.currentTime);
 	notch1.gain.setValueAtTime(-30, context.currentTime);
-	notch1.Q.setValueAtTime(2, context.currentTime);
+	notch1.Q.setValueAtTime(1, context.currentTime);
 
 	const notch2 = context.createBiquadFilter();
 	notch2.type = "notch";
 	notch2.frequency.setValueAtTime(120, context.currentTime);
 	notch2.gain.setValueAtTime(-30, context.currentTime);
-	notch2.Q.setValueAtTime(2, context.currentTime);
+	notch2.Q.setValueAtTime(1, context.currentTime);
 
 	const pa = context.createBiquadFilter();
 	pa.type = "highpass";
-	pa.frequency.setValueAtTime(200, context.currentTime);
+	pa.frequency.setValueAtTime(150, context.currentTime);
 
 	const pb = context.createBiquadFilter();
 	pb.type = "lowpass";
-	pb.frequency.setValueAtTime(2500, context.currentTime);
+	pb.frequency.setValueAtTime(5000, context.currentTime);
 
 	source.connect(gainNode);
 	gainNode.connect(compressor);
@@ -65,21 +65,63 @@ async function handleSuccess(stream) {
 	document.body.appendChild(tela);
 
 	const notas = [];
+	let notas_interp = [];
 
 	worklet.port.onmessage = function (e) {
-		if(e.data === null || e.data === -1) notas.push(-1);
-		else notas.push(Math.log(e.data/51.91309) / Math.log(Math.pow(2, 1/12)));
+		for(let i = 0; i < e.data.length; i++) {
+			let nota = e.data[i];
+
+			if(nota === null || nota === -1) notas.push(-1);
+			else notas.push(Math.log(nota/51.91309) / Math.log(Math.pow(2, 1/12)));
+		}
 	}
 
 
 	const showPeriod = 3;
-	const detectTime = 50;
+	const detectTime = 25;
 	let last = new Date();
+
+	function iir(buff,cutoff,lowpass, sampleRate) {
+    //https://en.wikipedia.org/wiki/High-pass_filter#Discrete-time_realization
+    //https://en.wikipedia.org/wiki/Low-pass_filter#Discrete-time_realization
+    var rc = 1/(2 * Math.PI * cutoff);
+    var sampleTime = 1/sampleRate;
+		var alpha = lowpass ? sampleTime / (sampleTime + rc) : rc / (sampleTime + rc);
+		
+		if(buff.length < 1) return [];
+
+		var result = Array(buff.length);
+    var lastOut = 0;
+
+    for(x = 0; x < result.length; x++) {
+        if(lowpass) result[x] = lastOut + alpha * (buff[x] - lastOut);
+        else {
+            var lastIn = x === 0 ? 0 : buff[x - 1];
+            result[x] = lastOut * alpha + (buff[x] - lastIn) * alpha
+        }
+
+        lastOut = result[x];
+    }
+
+    return result;
+}
 
 	function atualizarNotas() {
 		let now = new Date();
 		let delta = now - last;
 		let windowDiff = (notas.length * detectTime / 1000) - showPeriod;
+
+		let lastNote = 0;
+		for(let i = 0; i < notas.length; i++) {
+			let nota = notas[i];
+			if(nota != -1) {
+				lastNote = nota;
+				notas_interp[i] = nota;
+			}
+			else notas_interp[i] = lastNote;
+		}
+
+		notas_interp = iir(notas_interp, 10, true, 1000/50);
 
 		if(windowDiff > 0) {
 			windowDiff *= 1000;
@@ -95,6 +137,12 @@ async function handleSuccess(stream) {
 
 		for(let i = 0; i < notas.length; i++) {
 			ctx.fillRect(blockWidth * i, window.innerHeight - blockHeight * notas[i], blockWidth, blockHeight);
+		}
+
+		ctx.fillStyle = "rgb(100,100, 255)";
+
+		for(let i = 0; i < notas_interp.length; i++) {
+			ctx.fillRect(blockWidth * i, (window.innerHeight - blockHeight * notas_interp[i]) + blockHeight / 2, blockWidth, 2);
 		}
 
 		window.requestAnimationFrame(atualizarNotas);

@@ -1,20 +1,23 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+//import {Analyzer} from "./lib/pitch.js"
+
 const Pitchfinder = require("pitchfinder");
 
 const detectPitch = Pitchfinder.ACF2PLUS({
 	sampleRate: sampleRate,
-	minFrequency: 100,
-	maxFrequency: 2000,
-	sensitivity: 0.0001,
-	ratio : 5,
 });
 
-const detectTime = 50;
+const detectTime = 25;
 
 const detectSize = Math.round(sampleRate * (detectTime / 1000))
 
 let buffer = [];
 
+const usePitchfinder = true;
+
+const notas = [];
+
+//const pitch = new Analyzer(sampleRate);
 
 class teste extends AudioWorkletProcessor {
 	constructor() {
@@ -35,18 +38,39 @@ class teste extends AudioWorkletProcessor {
 
 		buffer = buffer.concat(entrada);
 
-		while(buffer.length > detectSize) {
-			let analise = buffer.splice(0, detectSize);
-
-			for(let x = 0; x < analise.length; x++) {
-				//Apply sine window
-				//I know there are better ones, idgaf, this one is super easy to generate
-				let windowValue = Math.sin((Math.PI / analise.length) * x);
-				analise[x] = windowValue * analise[x];
+		if(usePitchfinder) {
+			if(buffer.length > detectSize) {
+				let analise = buffer.splice(0, detectSize);
+	
+				for(let x = 0; x < analise.length; x++) {
+					//Apply sine window
+					//I know there are better ones, idgaf, this one is super easy to generate
+					let windowValue = Math.sin((Math.PI / analise.length) * x);
+					analise[x] = windowValue * analise[x];
+				}
+	
+				//notas.push(detectPitch(Float32Array.from(analise)));
+				this.port.postMessage([detectPitch(Float32Array.from(analise))]);
 			}
+		}
+		else {
+			while(buffer.length > detectSize) {
+				let analise = buffer.splice(0, detectSize);
 
-			this.port.postMessage(detectPitch(Float32Array.from(analise))); 
-			//this.port.postMessage(inputs[0][0].length);
+				pitch.input(analise);
+				pitch.process();
+
+				let tone = pitch.findTone();
+
+				if(tone === null) notas.push(-1);
+				else notas.push(tone.freq);
+			}
+		}
+
+		if(notas.length > 10) {
+			let subset = notas.splice(0, Math.round(1000 / detectTime));
+			this.port.postMessage(subset);
+			//console.log(subset);
 		}
 
     return true;
