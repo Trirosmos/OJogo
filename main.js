@@ -29,7 +29,7 @@ async function handleSuccess(stream) {
 
 	const pa = context.createBiquadFilter();
 	pa.type = "highpass";
-	pa.frequency.setValueAtTime(150, context.currentTime);
+	pa.frequency.setValueAtTime(60, context.currentTime);
 
 	const pb = context.createBiquadFilter();
 	pb.type = "lowpass";
@@ -68,17 +68,16 @@ async function handleSuccess(stream) {
 	let notas_interp = [];
 
 	worklet.port.onmessage = function (e) {
-		for(let i = 0; i < e.data.length; i++) {
-			let nota = e.data[i];
+		let nota = e.data;
 
-			if(nota === null || nota === -1) notas.push(-1);
-			else notas.push(Math.log(nota/51.91309) / Math.log(Math.pow(2, 1/12)));
-		}
+		if(nota === null || nota === -1) notas.push(-1);
+		else notas.push(Math.log(nota/51.91309) / Math.log(Math.pow(2, 1/12)));
 	}
 
 
 	const showPeriod = 3;
-	const detectTime = 25;
+	const detectTime = 12.5;
+	const divisoesNotas = 50;
 	let last = new Date();
 
 	function iir(buff,cutoff,lowpass, sampleRate) {
@@ -121,18 +120,32 @@ async function handleSuccess(stream) {
 			else notas_interp[i] = lastNote;
 		}
 
-		notas_interp = iir(notas_interp, 10, true, 1000/50);
+		notas_interp = iir(notas_interp, 10, true, 1000/detectTime);
 
 		if(windowDiff > 0) {
 			windowDiff *= 1000;
-			windowDiff = Math.round(windowDiff / 50);
+			windowDiff = Math.round(windowDiff / divisoesNotas);
 			notas.splice(0, windowDiff);
 		}
 
 		let blockWidth = tela.width / notas.length;
-		let blockHeight = tela.height / (12 * 5);
+		let blockHeight = tela.height / (divisoesNotas);
 
 		ctx.clearRect(0, 0, tela.width, tela.height);
+		ctx.fillStyle = "rgb(48,48,48)";
+		ctx.fillRect(0, 0, tela.width, tela.height);
+
+		for(let i = 0; i < divisoesNotas; i++) {
+			ctx.fillStyle = "rgb(59,59,59)";
+			ctx.fillRect(0, window.innerHeight - blockHeight * i, tela.width, 2);
+		}
+
+		for(let i = 0; i < 4; i++) {
+			let largura = tela.width / 4; 
+			ctx.fillStyle = "rgb(91,91,91)";
+			ctx.fillRect((i * largura) - 1, 0, 3, tela.height);
+		}
+
 		ctx.fillStyle = "orange";
 
 		for(let i = 0; i < notas.length; i++) {
@@ -147,6 +160,11 @@ async function handleSuccess(stream) {
 
 		window.requestAnimationFrame(atualizarNotas);
 	}
+
+	window.addEventListener("resize", function () {
+		tela.width = window.innerWidth;
+		tela.height = window.innerHeight;
+	});
 
 	atualizarNotas();
 };

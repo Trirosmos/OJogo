@@ -7,7 +7,7 @@ const detectPitch = Pitchfinder.ACF2PLUS({
 	sampleRate: sampleRate,
 });
 
-const detectTime = 25;
+const detectTime = 12.5;
 
 const detectSize = Math.round(sampleRate * (detectTime / 1000))
 
@@ -15,9 +15,9 @@ let buffer = [];
 
 const usePitchfinder = true;
 
-const notas = [];
-
 //const pitch = new Analyzer(sampleRate);
+
+const notas = [];
 
 class teste extends AudioWorkletProcessor {
 	constructor() {
@@ -39,7 +39,7 @@ class teste extends AudioWorkletProcessor {
 		buffer = buffer.concat(entrada);
 
 		if(usePitchfinder) {
-			if(buffer.length > detectSize) {
+			while(buffer.length > detectSize) {
 				let analise = buffer.splice(0, detectSize);
 	
 				for(let x = 0; x < analise.length; x++) {
@@ -48,9 +48,9 @@ class teste extends AudioWorkletProcessor {
 					let windowValue = Math.sin((Math.PI / analise.length) * x);
 					analise[x] = windowValue * analise[x];
 				}
-	
-				//notas.push(detectPitch(Float32Array.from(analise)));
-				this.port.postMessage([detectPitch(Float32Array.from(analise))]);
+				let pitch = detectPitch(Float32Array.from(analise));
+				//notas.push(pitch);
+				this.port.postMessage(pitch);
 			}
 		}
 		else {
@@ -67,10 +67,17 @@ class teste extends AudioWorkletProcessor {
 			}
 		}
 
-		if(notas.length > 10) {
-			let subset = notas.splice(0, Math.round(1000 / detectTime));
-			this.port.postMessage(subset);
-			//console.log(subset);
+		if(notas.length >= 8) {
+			let set = notas.splice(0, 8);
+			let media = 0;
+
+			for(let i in set) {
+				media += set[i];
+			}
+
+			media /= 8;
+
+			this.port.postMessage(media);
 		}
 
     return true;
