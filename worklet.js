@@ -6,7 +6,7 @@ const detectPitch = Pitchfinder.ACF2PLUS({
 	sampleRate: sampleRate,
 });
 
-const detectTime = 12.5;
+const detectTime = 6.25;
 
 const detectSize = Math.round(sampleRate * (detectTime / 1000))
 

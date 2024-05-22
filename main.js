@@ -76,7 +76,7 @@ async function handleSuccess(stream) {
 
 
 	const showPeriod = 3;
-	const detectTime = 12.5;
+	const detectTime = 6.25;
 	const divisoesNotas = 50;
 	let last = new Date();
 
