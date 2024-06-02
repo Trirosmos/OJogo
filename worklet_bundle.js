@@ -7,7 +7,7 @@ const detectPitch = Pitchfinder.ACF2PLUS({
 	sampleRate: sampleRate,
 });
 
-const detectTime = 12.5;
+const detectTime = 6.25;
 
 const detectSize = Math.round(sampleRate * (detectTime / 1000))
 
@@ -28,7 +28,7 @@ class teste extends AudioWorkletProcessor {
     }
   }
   process(inputs, outputs, parameters) {
-		const entrada = Array.from(inputs[0][0]);
+		const entrada = Array.from(inputs[0][1]);
 		const saida = outputs[0];
 
 		for(let x = 0; x < saida[0].length; x++) {

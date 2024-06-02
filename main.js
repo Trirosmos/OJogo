@@ -1,3 +1,139 @@
+document.body.style.backgroundColor = "rgb(48,48,48)";
+
+window.tempo = 0;
+
+let musica = {
+	bpm: 80,
+	compassos: [
+		{
+			vozes: [
+					{
+						notas: [
+							{ altura: 0, duracao: 4 },
+							{ altura: 30, duracao: 4 },
+							{ altura: 40, duracao: 4 },
+							{altura: 49, duracao: 4},
+						]
+					},
+					{
+						notas: [
+							{ altura: 0, duracao: 4 },
+							{ altura: 10, duracao: 4 },
+							{ altura: 20, duracao: 4 },
+							{altura: 30, duracao: 4},
+						]
+					},
+					{
+						notas: [
+							{ altura: 0, duracao: 4 },
+							{ altura: 10, duracao: 4 },
+							{ altura: 25, duracao: 4 },
+							{altura: 35, duracao: 4},
+					]}
+			]
+		},
+		{
+			vozes: [
+					{
+						notas: [
+							{ altura: 12, duracao: 4 },
+							{ altura: 13, duracao: 4 },
+							{ altura: 24, duracao: 4 },
+							{altura: 27, duracao: 4},
+						]
+					},
+					{
+						notas: [
+							{ altura: 28, duracao: 4 },
+							{ altura: 27, duracao: 4 },
+							{ altura: 25, duracao: 4 },
+							{altura: 20, duracao: 4},
+						]
+					},
+					{
+						notas: [
+							{ altura: 10, duracao: 4 },
+							{ altura: 20, duracao: 4 },
+							{ altura: 10, duracao: 4 },
+							{altura: 20, duracao: 4},
+					]}
+			]
+		},
+		{
+			vozes: [
+					{
+						notas: [
+							{ altura: 13, duracao: 4 },
+							{ altura: 14, duracao: 4 },
+							{ altura: 13, duracao: 4 },
+							{altura: 10, duracao: 4},
+						]
+					},
+					{
+						notas: [
+							{ altura: 0, duracao: 4 },
+							{ altura: 10, duracao: 4 },
+							{ altura: 20, duracao: 4 },
+							{altura: 30, duracao: 4},
+						]
+					},
+					{
+						notas: [
+							{ altura: 0, duracao: 4 },
+							{ altura: 10, duracao: 4 },
+							{ altura: 20, duracao: 4 },
+							{altura: 30, duracao: 4},
+					]}
+			]
+		},
+		{
+			vozes: [
+					{
+						notas: [
+							{ altura: 12, duracao: 8 },
+							{ altura: 10, duracao: 8 },
+						]
+					},
+					{
+						notas: [
+							{ altura: 20, duracao: 8 },
+							{ altura: 10, duracao: 8 },
+						]
+					},
+					{
+						notas: [
+							{ altura: 0, duracao: 4 },
+							{ altura: 10, duracao: 4 },
+							{ altura: 20, duracao: 4 },
+							{altura: 30, duracao: 4},
+					]}
+			]
+		},
+		{
+			vozes: [
+					{
+						notas: [
+							{ altura: 10, duracao: 8 },
+							{ altura: 1, duracao: 8 },
+						]
+					},
+					{
+						notas: [
+							{ altura: 2, duracao: 8 },
+							{ altura: 3, duracao: 8 },
+						]
+					},
+					{
+						notas: [
+							{ altura: 4, duracao: 4 },
+							{ altura: 5, duracao: 4 },
+							{ altura: 6, duracao: 4 },
+							{altura: 8, duracao: 4},
+					]}
+		 ]}
+	]
+}
+
 async function handleSuccess(stream) {
 	const context = new AudioContext({latencyHint: "playback"});
 	const source = context.createMediaStreamSource(stream);
@@ -35,18 +171,32 @@ async function handleSuccess(stream) {
 	pb.type = "lowpass";
 	pb.frequency.setValueAtTime(5000, context.currentTime);
 
-	source.connect(gainNode);
+	const synth = context.createOscillator();
+	synth.frequency.setValueAtTime(110, context.currentTime);
+	synth.start();
+
+	window.addEventListener("mousemove", function (e) {
+		let frac = 1 - (e.y / this.window.innerHeight);
+		let fracX = (e.x / this.window.innerWidth);
+
+		window.tempo = fracX * musica.compassos.length * 3;
+
+		synth.frequency.setValueAtTime(880 * frac, context.currentTime);
+	});
+
+	//source.connect(gainNode);
+	synth.connect(gainNode);
 	gainNode.connect(compressor);
 	compressor.connect(pa);
 	pa.connect(pb);
 	pb.connect(notch1);
 	notch1.connect(notch2);
 	notch2.connect(worklet);
-	worklet.connect(context.destination);
+	//worklet.connect(context.destination);
 
 	const tela = document.createElement("canvas");
 	tela.width = window.innerWidth;
-	tela.height = window.innerHeight;
+	tela.height = window.innerHeight * 0.9;
 	const ctx = tela.getContext("2d");
 
 	const volume = document.createElement("input");
@@ -78,6 +228,7 @@ async function handleSuccess(stream) {
 	const showPeriod = 3;
 	const detectTime = 6.25;
 	const divisoesNotas = 50;
+	const compassosPorTela = 4;
 	let last = new Date();
 
 	function iir(buff,cutoff,lowpass, sampleRate) {
@@ -103,7 +254,8 @@ async function handleSuccess(stream) {
     }
 
     return result;
-}
+	}
+	
 
 	function atualizarNotas() {
 		let now = new Date();
@@ -130,40 +282,79 @@ async function handleSuccess(stream) {
 
 		let blockWidth = tela.width / notas.length;
 		let blockHeight = tela.height / (divisoesNotas);
+		let semicolcheiaWidth = tela.width / (compassosPorTela * 16);
 
+		let numVoz = 0;
+		//let tempo = 0;
+		let tempoPorCompasso = 4 / (musica.bpm / 60);
+		let c = Math.floor(tempo / tempoPorCompasso);
+		let cOffset = (tempo % tempoPorCompasso)/tempoPorCompasso;
+		let notaStartPos = -cOffset * (tela.width / compassosPorTela);
+
+		//Cor de fundo
 		ctx.clearRect(0, 0, tela.width, tela.height);
 		ctx.fillStyle = "rgb(48,48,48)";
 		ctx.fillRect(0, 0, tela.width, tela.height);
 
-		for(let i = 0; i < divisoesNotas; i++) {
+		//Divisões de altura (eixo Y)
+		for(let i = -1; i < divisoesNotas + 1; i++) {
 			ctx.fillStyle = "rgb(59,59,59)";
-			ctx.fillRect(0, window.innerHeight - blockHeight * i, tela.width, 2);
+			ctx.fillRect(0, tela.height - blockHeight * i, tela.width, 2);
+
+			ctx.fillStyle = "white";
+			ctx.fillText(i, 5, tela.height - blockHeight * i - 4);
 		}
 
-		for(let i = 0; i < 4; i++) {
-			let largura = tela.width / 4; 
+		//Divisões de compasso (eixo X)
+		for(let i = 0; i < 5; i++) {
+			let largura = tela.width / compassosPorTela; 
 			ctx.fillStyle = "rgb(91,91,91)";
-			ctx.fillRect((i * largura) - 1, 0, 3, tela.height);
+			ctx.fillRect(notaStartPos + (i * largura) - 1, 0, 3, tela.height);
 		}
 
 		ctx.fillStyle = "orange";
 
-		for(let i = 0; i < notas.length; i++) {
-			ctx.fillRect(blockWidth * i, window.innerHeight - blockHeight * notas[i], blockWidth, blockHeight);
+		while(c < musica.compassos.length && tempo >= 0) {
+			let compasso = musica.compassos[c];
+			let voz = compasso.vozes[numVoz];
+
+			let semicolcheiaCounter = 0;
+
+			if(notaStartPos >= tela.width) {
+				break;
+			}
+
+			for(n in voz.notas) {
+				let nota = voz.notas[n];
+				let duracao = Math.min(16 - semicolcheiaCounter, nota.duracao);
+
+				ctx.save();
+				ctx.fillRect(notaStartPos, tela.height - blockHeight * (nota.altura + 1), semicolcheiaWidth * duracao, blockHeight);
+				ctx.restore();
+
+				notaStartPos += semicolcheiaWidth * nota.duracao;
+				semicolcheiaCounter += duracao;
+			}
+
+			c++;
 		}
 
-		ctx.fillStyle = "rgb(100,100, 255)";
+		for(let i = 0; i < notas.length; i++) {
+			//ctx.fillRect(blockWidth * i, tela.height - blockHeight * notas[i], blockWidth, blockHeight);
+		}
+
+		/*ctx.fillStyle = "rgb(100,100, 255)";
 
 		for(let i = 0; i < notas_interp.length; i++) {
-			ctx.fillRect(blockWidth * i, (window.innerHeight - blockHeight * notas_interp[i]) + blockHeight / 2, blockWidth, 2);
-		}
+			ctx.fillRect(blockWidth * i, (tela.height - blockHeight * notas_interp[i]) + blockHeight / 2, blockWidth, 2);
+		}*/
 
 		window.requestAnimationFrame(atualizarNotas);
 	}
 
 	window.addEventListener("resize", function () {
 		tela.width = window.innerWidth;
-		tela.height = window.innerHeight;
+		tela.height = window.innerHeight * 0.9;
 	});
 
 	atualizarNotas();
