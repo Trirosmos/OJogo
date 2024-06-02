@@ -179,7 +179,7 @@ async function handleSuccess(stream) {
 		let frac = 1 - (e.y / this.window.innerHeight);
 		let fracX = (e.x / this.window.innerWidth);
 
-		window.tempo = fracX * musica.compassos.length * 3;
+		window.tempo = -3 * compassosPorTela + fracX * musica.compassos.length * 6;
 
 		synth.frequency.setValueAtTime(880 * frac, context.currentTime);
 	});
@@ -287,7 +287,7 @@ async function handleSuccess(stream) {
 		let numVoz = 0;
 		//let tempo = 0;
 		let tempoPorCompasso = 4 / (musica.bpm / 60);
-		let c = Math.floor(tempo / tempoPorCompasso);
+		let c = tempo > 0 ? Math.floor(tempo / tempoPorCompasso) : -Math.floor((-tempo) / tempoPorCompasso);
 		let cOffset = (tempo % tempoPorCompasso)/tempoPorCompasso;
 		let notaStartPos = -cOffset * (tela.width / compassosPorTela);
 
@@ -314,7 +314,13 @@ async function handleSuccess(stream) {
 
 		ctx.fillStyle = "orange";
 
-		while(c < musica.compassos.length && tempo >= 0) {
+		while(c < musica.compassos.length) {
+			if(c < 0) {
+				c++;
+				notaStartPos += semicolcheiaWidth * 16;
+				continue;
+			}
+
 			let compasso = musica.compassos[c];
 			let voz = compasso.vozes[numVoz];
 
