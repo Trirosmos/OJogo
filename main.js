@@ -1,5 +1,10 @@
 document.body.style.backgroundColor = "rgb(48,48,48)";
 
+var exampleSocket = new WebSocket(
+  "ws://192.168.0.167:8080",
+);
+
+
 let song = {
 	bpm: 80,
 	compassos: [
@@ -137,8 +142,10 @@ let notas = [];
 let started = false;
 let timeStamp0 = 0;
 
-async function handleSuccess(stream) {
-	const context = new AudioContext({latencyHint: "playback"});
+let context;
+
+async function setupWebAudio(stream) {
+	context = new AudioContext({latencyHint: "playback"});
 	const source = context.createMediaStreamSource(stream);
 
 	await context.audioWorklet.addModule("worklet_bundle.js");
@@ -178,6 +185,31 @@ async function handleSuccess(stream) {
 	synth.frequency.setValueAtTime(110, context.currentTime);
 	synth.start();
 
+	source.connect(gainNode);
+	//synth.connect(gainNode);
+	gainNode.connect(compressor);
+	compressor.connect(pa);
+	pa.connect(pb);
+	pb.connect(notch1);
+	notch1.connect(notch2);
+	notch2.connect(worklet);
+	worklet.connect(context.destination);
+
+	const volume = document.createElement("input");
+	volume.type = "range";
+	volume.min = 0;
+	volume.max = 40;
+	volume.value = "1";
+	volume.step = 0.1;
+
+	volume.onchange = function (e) {
+		gainNode.gain.setValueAtTime(Number(e.target.value), context.currentTime);
+	}
+
+	document.body.appendChild(volume);
+}
+
+async function handleSuccess(stream) {
 	window.addEventListener("mousemove", function (e) {
 		let frac = 1 - (e.y / this.window.innerHeight);
 		let fracX = (e.x / this.window.innerWidth);
@@ -193,33 +225,10 @@ async function handleSuccess(stream) {
 		}
 	});
 
-	source.connect(gainNode);
-	//synth.connect(gainNode);
-	gainNode.connect(compressor);
-	compressor.connect(pa);
-	pa.connect(pb);
-	pb.connect(notch1);
-	notch1.connect(notch2);
-	notch2.connect(worklet);
-	worklet.connect(context.destination);
-
 	const tela = document.createElement("canvas");
 	tela.width = window.innerWidth;
 	tela.height = window.innerHeight * 0.9;
 
-	const volume = document.createElement("input");
-	volume.type = "range";
-	volume.min = 0;
-	volume.max = 40;
-	volume.value = "1";
-	volume.step = 0.1;
-
-	volume.onchange = function (e) {
-		gainNode.gain.setValueAtTime(Number(e.target.value), context.currentTime);
-		console.log(gainNode);
-	}
-
-	document.body.appendChild(volume);
 	document.body.appendChild(tela);
 
 	worklet.port.onmessage = function (e) {
@@ -265,7 +274,7 @@ async function handleSuccess(stream) {
 		desenharFundo(tela, config, song, tempo, "orange");
 
 		desenharVoz(tela, config, song, tempo, 0, "orange");
-		desenharVoz(tela, config, song, tempo, 1, "blue");
+		//desenharVoz(tela, config, song, tempo, 1, "blue");
 		desenharPitchDetect(tela, config, song, tempo, notas);
 
 		let ctx = tela.getContext("2d");
@@ -288,19 +297,4 @@ async function handleSuccess(stream) {
 	});
 };
 
-let bot = document.createElement("button");
-bot.innerText = "Começar!";
-document.body.appendChild(bot);
-
-bot.onclick = function () {
-	navigator.mediaDevices
-	.getUserMedia({
-		audio: {
-			autoGainControl: false,
-			echoCancellation: false,
-			noiseSuppression: false
-		},
-		video: false
-	})
-	.then(handleSuccess);
-}
+createSetupWindow();
