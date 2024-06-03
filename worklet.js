@@ -27,7 +27,7 @@ class teste extends AudioWorkletProcessor {
     }
   }
   process(inputs, outputs, parameters) {
-		const entrada = Array.from(inputs[0][1]);
+		const entrada = Array.from(inputs[0][0]);
 		const saida = outputs[0];
 
 		for(let x = 0; x < saida[0].length; x++) {
