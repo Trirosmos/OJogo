@@ -5,3 +5,9 @@ let config = {
 	compassosPorTela: 4,
 	preRollSeconds: 5
 }
+
+let serverConfig = {
+	ip: "127.0.0.1",
+	nome: "Fulano",
+	espectador: true
+};

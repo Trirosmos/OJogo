@@ -1,8 +1,6 @@
 document.body.style.backgroundColor = "rgb(48,48,48)";
 
-var exampleSocket = new WebSocket(
-  "ws://192.168.0.167:8080",
-);
+let sock;
 
 
 let song = {
@@ -143,16 +141,20 @@ let started = false;
 let timeStamp0 = 0;
 
 let context;
+let gainNode;
+let worklet;
 
 async function setupWebAudio(stream) {
 	context = new AudioContext({latencyHint: "playback"});
 	const source = context.createMediaStreamSource(stream);
 
 	await context.audioWorklet.addModule("worklet_bundle.js");
-	const worklet = new AudioWorkletNode(context, "teste");
+	worklet = new AudioWorkletNode(context, "teste");
 	source.connect(worklet);
 
-	const gainNode = context.createGain();
+	//handleSuccess(stream, worklet);
+
+	gainNode = context.createGain();
 
 	const compressor = context.createDynamicsCompressor();
 	compressor.threshold.setValueAtTime(-50, context.currentTime);
@@ -185,31 +187,6 @@ async function setupWebAudio(stream) {
 	synth.frequency.setValueAtTime(110, context.currentTime);
 	synth.start();
 
-	source.connect(gainNode);
-	//synth.connect(gainNode);
-	gainNode.connect(compressor);
-	compressor.connect(pa);
-	pa.connect(pb);
-	pb.connect(notch1);
-	notch1.connect(notch2);
-	notch2.connect(worklet);
-	worklet.connect(context.destination);
-
-	const volume = document.createElement("input");
-	volume.type = "range";
-	volume.min = 0;
-	volume.max = 40;
-	volume.value = "1";
-	volume.step = 0.1;
-
-	volume.onchange = function (e) {
-		gainNode.gain.setValueAtTime(Number(e.target.value), context.currentTime);
-	}
-
-	document.body.appendChild(volume);
-}
-
-async function handleSuccess(stream) {
 	window.addEventListener("mousemove", function (e) {
 		let frac = 1 - (e.y / this.window.innerHeight);
 		let fracX = (e.x / this.window.innerWidth);
@@ -217,6 +194,18 @@ async function handleSuccess(stream) {
 		synth.frequency.setValueAtTime(880 * 4 * frac, context.currentTime);
 	});
 
+	//source.connect(gainNode);
+	synth.connect(gainNode);
+	gainNode.connect(compressor);
+	compressor.connect(pa);
+	pa.connect(pb);
+	pb.connect(notch1);
+	notch1.connect(notch2);
+	notch2.connect(worklet);
+	worklet.connect(context.destination);
+}
+
+async function handleSuccess(stream, worklet) {
 	window.addEventListener("keydown", function (e) {
 		if(e.key === "a") {
 			started = true;

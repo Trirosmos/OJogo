@@ -14,6 +14,9 @@ let buffer = [];
 
 const usePitchfinder = true;
 
+let monitorar = false;
+let gateCompare = 0;
+
 //const pitch = new Analyzer(sampleRate);
 
 const notas = [];
@@ -23,7 +26,13 @@ class teste extends AudioWorkletProcessor {
 		super();
 
 		this.port.onmessage = function (e) {
-			//
+			let msg = e.data;
+
+			if(msg.type == "monitorarToggle") monitorar = msg.value;
+			if(msg.type == "gateLevel") {
+				let emDb = (1 / Math.pow(10, msg.value / 20));
+				gateCompare = emDb == 1 ? 0 : emDb;
+			}
     }
   }
   process(inputs, outputs, parameters) {
@@ -31,8 +40,14 @@ class teste extends AudioWorkletProcessor {
 		const saida = outputs[0];
 
 		for(let x = 0; x < saida[0].length; x++) {
-			saida[0][x] = entrada[x];
-			if(saida[1]) saida[1][x] = entrada[x];
+			if(monitorar) {
+				saida[0][x] = entrada[x];
+				if(saida[1]) saida[1][x] = entrada[x];
+			}
+		}
+
+		for(let x = 0; x < entrada.length; x++) {
+			if(Math.abs(entrada[x]) < gateCompare) entrada[x] = 0;
 		}
 
 		buffer = buffer.concat(entrada);
