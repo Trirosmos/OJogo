@@ -78,6 +78,14 @@ function createSetupControls(wind) {
 		sock = new WebSocket(
 			"ws://" + serverConfig.ip
 		);
+
+		sock.onerror = function (e) {
+			alert("Erro ao conectar ao servidor de websocket");
+		};
+
+		sock.onopen = function (e) {
+			console.log("Conectou!");
+		}
 	}
 
 	espectadorToggle.onchange = function () {
