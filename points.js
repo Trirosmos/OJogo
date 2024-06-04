@@ -4,7 +4,7 @@ function getNoteAvgFreq(duracao, musica, notas, conf) {
 
 	if(notas.length > quantidadeMedidas) {
 		let notasInteresse = notas.splice(0, quantidadeMedidas).filter((a) => a !== -1);
-		if(notasInteresse.length > 0) {
+		if(notasInteresse.length > quantidadeMedidas * 0.25) {
 			let avg = notasInteresse.reduce((acc, curr) => acc + curr) / notasInteresse.length;
 			return avg;
 		}
