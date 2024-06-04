@@ -197,8 +197,8 @@ async function setupWebAudio(flux) {
 		synth.frequency.setValueAtTime(880 * 4 * frac, context.currentTime);
 	});
 
-	source.connect(gainNode);
-	//synth.connect(gainNode);
+	//source.connect(gainNode);
+	synth.connect(gainNode);
 	gainNode.connect(compressor);
 	compressor.connect(pa);
 	pa.connect(pb);
@@ -274,8 +274,9 @@ async function handleSuccess() {
 		ctx.font = "bold 48px serif";
 		ctx.fillStyle = "orange";
 		ctx.globalAlpha = 0.6;
-		ctx.textAlign = "center;"
-		ctx.fillText(atribuiPontos(song, notas, 0, config), -15 + tela.width / 2, -24 + tela.height / 2);
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		ctx.fillText(atribuiPontos(song, notas, 0, config), tela.width / 2, -24 + tela.height / 2);
 		ctx.restore();
 
 
