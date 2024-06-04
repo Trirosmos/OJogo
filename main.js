@@ -232,7 +232,7 @@ async function handleSuccess() {
 			tempo = new Date();
 			tempo -= timeStamp0;
 			tempo /= 1000;
-			tempo -= config.preRollSeconds;
+			tempo -= config.preRollBeats * getSongData(song).tempoPorCompasso/4;
 		}
 
 		if(started && tempo > 0) {
@@ -255,7 +255,7 @@ async function handleSuccess() {
 			tempo = new Date();
 			tempo -= timeStamp0;
 			tempo /= 1000;
-			tempo -= config.preRollSeconds;
+			tempo -= config.preRollBeats * getSongData(song).tempoPorCompasso/4;
 		}
 
 		if(tempo > lastTempo + (config.compassosPorTela * getSongData(song).tempoPorCompasso)) {
@@ -274,6 +274,7 @@ async function handleSuccess() {
 		ctx.font = "bold 48px serif";
 		ctx.fillStyle = "orange";
 		ctx.globalAlpha = 0.6;
+		ctx.textAlign = "center;"
 		ctx.fillText(atribuiPontos(song, notas, 0, config), -15 + tela.width / 2, -24 + tela.height / 2);
 		ctx.restore();
 

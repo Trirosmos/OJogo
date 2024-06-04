@@ -55,15 +55,19 @@ function createSetupControls(wind) {
 	conexaoText.style.color = "white";
 
 	const ipInput = document.createElement("input");
+	ipInput.value = serverConfig.ip;
 
 	ipInput.onchange = function () {
 		serverConfig.ip = ipInput.value;
+		localStorage.setItem("serverConfig", JSON.stringify(serverConfig));
 	}
 
 	const nomeInput = document.createElement("input");
+	nomeInput.value = serverConfig.nome;
 
 	nomeInput.onchange = function () {
 		serverConfig.nome = nomeInput.value;
+		localStorage.setItem("serverConfig", JSON.stringify(serverConfig));
 	}
 
 	const espectadorToggle = document.createElement("input");
