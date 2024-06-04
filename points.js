@@ -44,10 +44,18 @@ function atribuiPontos(musica, notas, numVoz, conf) {
 		let antiga = paresPontuacao[i - 1];
 		let atual = paresPontuacao[i];
 
-		deltas.push({
-			detectada: atual.detectada > antiga.detectada ? 1 : -1,
-			suposta: atual.suposta > antiga.suposta ? 1 : -1,
-		});
+		if(atual.detectada === -1 || antiga.detectada === -1) {
+			deltas.push({
+				detectada: -1,
+				suposta: 0
+			});
+		}
+		else {
+			deltas.push({
+				detectada: atual.detectada > antiga.detectada ? 1 : -1,
+				suposta: atual.suposta > antiga.suposta ? 1 : -1,
+			});
+		}
 	}
 
 	for(let i = 0; i < deltas.length; i++) {
