@@ -143,8 +143,11 @@ let timeStamp0 = 0;
 let context;
 let gainNode;
 let worklet;
+let stream;
 
-async function setupWebAudio(stream) {
+async function setupWebAudio(flux) {
+	stream = flux;
+
 	context = new AudioContext({latencyHint: "playback"});
 	const source = context.createMediaStreamSource(stream);
 
@@ -194,8 +197,8 @@ async function setupWebAudio(stream) {
 		synth.frequency.setValueAtTime(880 * 4 * frac, context.currentTime);
 	});
 
-	//source.connect(gainNode);
-	synth.connect(gainNode);
+	source.connect(gainNode);
+	//synth.connect(gainNode);
 	gainNode.connect(compressor);
 	compressor.connect(pa);
 	pa.connect(pb);
@@ -205,7 +208,7 @@ async function setupWebAudio(stream) {
 	worklet.connect(context.destination);
 }
 
-async function handleSuccess(stream, worklet) {
+async function handleSuccess() {
 	window.addEventListener("keydown", function (e) {
 		if(e.key === "a") {
 			started = true;

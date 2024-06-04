@@ -85,6 +85,8 @@ function createSetupControls(wind) {
 
 		sock.onopen = function (e) {
 			console.log("Conectou!");
+			handleSuccess();
+			wind.remove();
 		}
 	}
 
