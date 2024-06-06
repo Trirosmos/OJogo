@@ -91,7 +91,31 @@ function createSetupControls(wind) {
 			console.log("Conectou!");
 			handleSuccess();
 			wind.remove();
+
+			sock.send(JSON.stringify({
+				type: "initial",
+				espectador: serverConfig.espectador
+			}));
 		}
+
+		sock.onmessage = (e) => {
+			let msg = JSON.parse(e.data);
+
+			if(msg.type === "atribuirVoz") {
+				serverConfig.voz = msg.voz;
+				serverConfig.playerColors = msg.cores;
+				localStorage.setItem("serverConfig", JSON.stringify(serverConfig));
+			}
+
+			if(msg.type === "start" && !serverConfig.espectador) {
+				notas = [];
+				timeStamp0 = new Date(msg.timestamp)
+				started = true;
+
+				console.log("Começamo");
+				console.log(timeStamp0);
+			}
+		};
 	}
 
 	espectadorToggle.onchange = function () {

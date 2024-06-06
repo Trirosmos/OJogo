@@ -2,6 +2,8 @@ document.body.style.backgroundColor = "rgb(48,48,48)";
 
 let sock;
 
+let backingTrack = document.createElement("audio");
+
 
 let song = {
 	bpm: 80,
@@ -210,10 +212,17 @@ async function setupWebAudio(flux) {
 
 async function handleSuccess() {
 	window.addEventListener("keydown", function (e) {
-		if(e.key === "a") {
+		if(e.key === "a" && serverConfig.espectador) {
 			started = true;
-			timeStamp0 = new Date();
-			notas = [];
+			let comeco = Date.now();
+			timeStamp0 = new Date(comeco);
+
+			if(sock) {
+				sock.send(JSON.stringify({
+					type: "start",
+					timestamp: comeco
+				}));
+			}
 		}
 	});
 
@@ -265,20 +274,25 @@ async function handleSuccess() {
 
 		desenharFundo(tela, config, song, tempo, "orange");
 
-		desenharVoz(tela, config, song, tempo, 0, "orange");
-		//desenharVoz(tela, config, song, tempo, 1, "blue");
-		desenharPitchDetect(tela, config, song, tempo, notas);
+		if(serverConfig.espectador) {
+			desenharVoz(tela, config, song, tempo, 0, serverConfig.playerColors[0]);
+			desenharVoz(tela, config, song, tempo, 1, serverConfig.playerColors[1]);
+			desenharVoz(tela, config, song, tempo, 2, serverConfig.playerColors[2]);
+		}
+		else {
+			desenharVoz(tela, config, song, tempo, serverConfig.voz, serverConfig.playerColors[serverConfig.voz]);
+			desenharPitchDetect(tela, config, song, tempo, notas);
 
-		let ctx = tela.getContext("2d");
-		ctx.save();
-		ctx.font = "bold 48px serif";
-		ctx.fillStyle = "orange";
-		ctx.globalAlpha = 0.6;
-		ctx.textAlign = "center";
-		ctx.textBaseline = "middle";
-		ctx.fillText(atribuiPontos(song, notas, 0, config), tela.width / 2, -24 + tela.height / 2);
-		ctx.restore();
-
+			let ctx = tela.getContext("2d");
+			ctx.save();
+			ctx.font = "bold 48px serif";
+			ctx.fillStyle = "orange";
+			ctx.globalAlpha = 0.6;
+			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
+			ctx.fillText(atribuiPontos(song, notas, 0, config), tela.width / 2, -24 + tela.height / 2);
+			ctx.restore();
+		}
 
 		window.requestAnimationFrame(update);
 	}

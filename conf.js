@@ -10,7 +10,7 @@ else {
 		detectTime: 6.25,
 		divisoesNotas: 50,
 		compassosPorTela: 4,
-		preRollBeats: 4
+		preRollBeats: 4,
 	};
 
 	localStorage.setItem("config", JSON.stringify(config));
@@ -34,6 +34,8 @@ else {
 	serverConfig = {
 		ip: "127.0.0.1",
 		nome: "Fulano",
-		espectador: true
+		espectador: false,
+		playerColors: ["orange","blue", "green"],
+		voz: 0
 	};
 }
