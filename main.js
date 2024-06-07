@@ -301,8 +301,6 @@ async function handleSuccess() {
 						type: "timestamp",
 						value: Date.now() - timeStamp0
 					}));
-
-					console.log(tempo * 1000);
 				}
 			}
 		}

@@ -37,9 +37,15 @@ wss.on('connection', function connection(ws, req) {
           voz: nextAvailableVoice,
           cores: playerColors
         }));
+
+        players[ip].color = playerColors[nextAvailableVoice];
       
         if(nextAvailableVoice < 3) nextAvailableVoice++;
       }
+      players[ip].espectador = msg.espectador;
+      players[ip].nome = msg.nome;
+
+      console.log(players);
     }
 
     if(msg.type === "start") {
@@ -77,6 +83,17 @@ wss.on('connection', function connection(ws, req) {
           client.send(JSON.stringify({
             type: "stop"
           }));
+        }
+      });
+    }
+
+    if(msg.type === "score") {
+      wss.clients.forEach(function each(client) {
+        let player = players[client._socket._peername.address];
+        if(player) {
+          if(player.espectador) {
+            client.send(JSON.stringify(msg));
+          }
         }
       });
     }

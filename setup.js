@@ -94,8 +94,21 @@ function createSetupControls(wind) {
 
 			sock.send(JSON.stringify({
 				type: "initial",
-				espectador: serverConfig.espectador
+				espectador: serverConfig.espectador,
+				nome: serverConfig.nome
 			}));
+
+			window.setInterval(() => {
+				if(sock && !serverConfig.espectador) {
+					sock.send(JSON.stringify({
+						type: "score",
+						score: atribuiPontos(song, notas, 0, config),
+						voz: serverConfig.voz,
+						cor: serverConfig.playerColors[serverConfig.voz],
+						nome: serverConfig.nome
+					}));
+				}
+			});
 		}
 
 		sock.onmessage = (e) => {
@@ -134,6 +147,10 @@ function createSetupControls(wind) {
 				started = false;
 				backingTrack.currentTime = 0;
 				backingTrack.pause();
+			}
+
+			if(msg.type === "score" && serverConfig.espectador) {
+				console.log(msg);
 			}
 		};
 	}
