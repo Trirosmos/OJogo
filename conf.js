@@ -1,21 +1,11 @@
-let config;
+let config = {
+	showPeriod: 3,
+	detectTime: 6.25,
+	divisoesNotas: 50,
+	compassosPorTela: 4,
+	preRollBeats: 8,
+};
 let serverConfig;
-
-if(localStorage.getItem("config")) {
-	config = JSON.parse(localStorage.getItem("config"));
-}
-else {
-	config = {
-		showPeriod: 3,
-		detectTime: 6.25,
-		divisoesNotas: 50,
-		compassosPorTela: 4,
-		preRollBeats: 4,
-	};
-
-	localStorage.setItem("config", JSON.stringify(config));
-}
-
 
 if(localStorage.getItem("serverConfig")) {
 	serverConfig = JSON.parse(localStorage.getItem("serverConfig"));

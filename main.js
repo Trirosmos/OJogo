@@ -3,10 +3,12 @@ document.body.style.backgroundColor = "rgb(48,48,48)";
 let sock;
 
 let backingTrack = document.createElement("audio");
+backingTrack.src = "bt.mp3";
+document.body.appendChild(backingTrack);
 
 
 let song = {
-	bpm: 80,
+	bpm: 60,
 	compassos: [
 		{
 			vozes: [
@@ -150,12 +152,12 @@ let stream;
 async function setupWebAudio(flux) {
 	stream = flux;
 
-	context = new AudioContext({latencyHint: "playback"});
+	context = new AudioContext({latencyHint: 0});
 	const source = context.createMediaStreamSource(stream);
 
 	await context.audioWorklet.addModule("worklet_bundle.js");
 	worklet = new AudioWorkletNode(context, "teste");
-	source.connect(worklet);
+	//source.connect(worklet);
 
 	//handleSuccess(stream, worklet);
 
@@ -190,7 +192,7 @@ async function setupWebAudio(flux) {
 
 	const synth = context.createOscillator();
 	synth.frequency.setValueAtTime(110, context.currentTime);
-	synth.start();
+	//synth.start();
 
 	window.addEventListener("mousemove", function (e) {
 		let frac = 1 - (e.y / this.window.innerHeight);
@@ -199,8 +201,8 @@ async function setupWebAudio(flux) {
 		synth.frequency.setValueAtTime(880 * 4 * frac, context.currentTime);
 	});
 
-	//source.connect(gainNode);
-	synth.connect(gainNode);
+	source.connect(gainNode);
+	//synth.connect(gainNode);
 	gainNode.connect(compressor);
 	compressor.connect(pa);
 	pa.connect(pb);
@@ -217,12 +219,21 @@ async function handleSuccess() {
 			let comeco = Date.now();
 			timeStamp0 = new Date(comeco);
 
+			backingTrack.currentTime = 0;
+			backingTrack.play();
+
 			if(sock) {
 				sock.send(JSON.stringify({
 					type: "start",
 					timestamp: comeco
 				}));
 			}
+		}
+
+		if(e.key === "p" && serverConfig.espectador) {
+			started = false;
+			backingTrack.currentTime = 0;
+			backingTrack.pause();
 		}
 	});
 
@@ -255,6 +266,7 @@ async function handleSuccess() {
 	}
 
 	let last = new Date();
+	let frames = 0;
 
 	function update() {
 		let tempo;
@@ -269,7 +281,24 @@ async function handleSuccess() {
 
 		if(tempo > lastTempo + (config.compassosPorTela * getSongData(song).tempoPorCompasso)) {
 			tempo = lastTempo + (config.compassosPorTela * getSongData(song).tempoPorCompasso);
+			backingTrack.pause();
+			backingTrack.currentTime = 0;
 			//started = false;
+		}
+
+		frames++;
+		if(frames > 10) {
+			frames = 0;
+			if(serverConfig.espectador) {
+				if(sock) {
+					sock.send(JSON.stringify({
+						type: "timestamp",
+						value: Date.now() - timeStamp0
+					}));
+
+					console.log(tempo * 1000);
+				}
+			}
 		}
 
 		desenharFundo(tela, config, song, tempo, "orange");
@@ -290,7 +319,8 @@ async function handleSuccess() {
 			ctx.globalAlpha = 0.6;
 			ctx.textAlign = "center";
 			ctx.textBaseline = "middle";
-			ctx.fillText(atribuiPontos(song, notas, 0, config), tela.width / 2, -24 + tela.height / 2);
+			//ctx.fillText(atribuiPontos(song, notas, 0, config), tela.width / 2, -24 + tela.height / 2);
+			ctx.fillText(timeStamp0, tela.width / 2, -24 + tela.height / 2);
 			ctx.restore();
 		}
 

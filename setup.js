@@ -109,11 +109,25 @@ function createSetupControls(wind) {
 
 			if(msg.type === "start" && !serverConfig.espectador) {
 				notas = [];
-				timeStamp0 = new Date(msg.timestamp)
+				//timeStamp0 = new Date(msg.timestamp)
+				timeStamp0 = new Date();
+				timeStamp0 -= msg.latency;
 				started = true;
 
 				console.log("Começamo");
 				console.log(timeStamp0);
+			}
+
+			if(msg.type === "ping" && !serverConfig.espectador) {
+				sock.send(JSON.stringify({
+					type: "pong"
+				}));
+			}
+
+			if(msg.type === "timestamp" && !serverConfig.espectador) {
+				let now = new Date();
+				let then = msg.value;
+				timeStamp0 = now - then;
 			}
 		};
 	}
