@@ -73,6 +73,11 @@ function createSetupControls(wind) {
 	const espectadorToggle = document.createElement("input");
 	espectadorToggle.type = "checkbox";
 
+	espectadorToggle.onchange = function () {
+		serverConfig.espectador = espectadorToggle.checked;
+		localStorage.setItem("serverConfig", JSON.stringify(serverConfig));
+	}
+
 	let bot = document.createElement("button");
 	bot.innerText = "Conectar";
 	bot.style.width = "20%";
@@ -150,14 +155,28 @@ function createSetupControls(wind) {
 			}
 
 			if(msg.type === "score" && serverConfig.espectador) {
-				console.log(msg);
+				if(!playerData[msg.voz]) playerData[msg.voz] = {};
+
+				playerData[msg.voz].score = msg.score;
+				playerData[msg.voz].cor = msg.cor;
+				playerData[msg.voz].nome = msg.nome;
+			}
+
+			if(msg.type === "disconnect" && serverConfig.espectador) {
+				playerData.splice(msg.voz, 1);
+				console.log(playerData);
 			}
 		};
 	}
 
-	espectadorToggle.onchange = function () {
-		serverConfig.espectador = espectadorToggle.checked;
-	}
+	
+
+	let localStorageBot = document.createElement("button");
+	localStorageBot.innerHTML = "Resetar localstorage";
+
+	localStorageBot.onclick = function () {
+		localStorage.removeItem("serverConfig");
+	};
 
 	wind.appendChild(audioText);
 	wind.appendChild(criarSpan("Volume:", "white"));
@@ -191,7 +210,10 @@ function createSetupControls(wind) {
 	wind.appendChild(document.createElement("br"));
 	wind.appendChild(document.createElement("br"));
 	wind.appendChild(document.createElement("br"));
+
 	wind.appendChild(bot);
+	wind.appendChild(document.createElement("br"));
+	wind.appendChild(localStorageBot);
 
 }
 

@@ -141,6 +141,24 @@ let song = {
 
 let notas = [];
 
+/*let playerData = [{
+	nome: "Beltrano",
+	cor: "grey",
+	score: "30"
+},
+{
+	nome: "Fulano",
+	cor: "orange",
+	score: "20"
+	},
+	{
+		nome: "Ciclano",
+		cor: "blue",
+		score: "155"
+	}];*/
+
+let playerData = [];
+
 let started = false;
 let timeStamp0 = 0;
 
@@ -148,6 +166,9 @@ let context;
 let gainNode;
 let worklet;
 let stream;
+
+let scoreScreen;
+let scoreCtx;
 
 async function setupWebAudio(flux) {
 	stream = flux;
@@ -235,6 +256,8 @@ async function handleSuccess() {
 			backingTrack.currentTime = 0;
 			backingTrack.pause();
 
+			playerData = [];
+
 			if(sock) {
 				sock.send(JSON.stringify({
 					type: "stop"
@@ -248,6 +271,17 @@ async function handleSuccess() {
 	tela.height = window.innerHeight * 0.9;
 
 	document.body.appendChild(tela);
+
+	scoreScreen = document.createElement("canvas");
+	scoreScreen.width = window.innerWidth * 0.2;
+	scoreScreen.height = window.innerHeight * 0.4;
+	scoreScreen.style.position = "absolute";
+	scoreScreen.style.left = "10%";
+	scoreScreen.style.top = "10%";
+	scoreScreen.style.visibility = "hidden";
+	scoreCtx = scoreScreen.getContext("2d");
+
+	document.body.appendChild(scoreScreen);
 
 	worklet.port.onmessage = function (e) {
 		let nota = e.data;
@@ -308,9 +342,49 @@ async function handleSuccess() {
 		desenharFundo(tela, config, song, tempo, "orange");
 
 		if(serverConfig.espectador) {
-			desenharVoz(tela, config, song, tempo, 0, serverConfig.playerColors[0]);
-			desenharVoz(tela, config, song, tempo, 1, serverConfig.playerColors[1]);
-			desenharVoz(tela, config, song, tempo, 2, serverConfig.playerColors[2]);
+			if(playerData.length > 0) {
+				for(let p in playerData) {
+					let player = playerData[p];
+
+					desenharVoz(tela, config, song, tempo, p, serverConfig.playerColors[p]);
+				}
+			}
+
+			scoreScreen.style.visibility = "visible";
+			scoreCtx.clearRect(0, 0, scoreScreen.width, scoreScreen.height);
+
+			if(playerData.length > 0) {
+				let amntP = playerData.length;
+				let pSpaceWidth = scoreScreen.width / amntP;
+				let barHeight = scoreScreen.height * 0.6;
+				let baseLeft = pSpaceWidth * 0.2;
+				let bottomBase = (scoreScreen.height * 0.8);
+				let fontSize = pSpaceWidth * 0.6 * (1 / 3);
+				let maxScore = 0;
+
+				for(let p = 0; p < amntP; p++) {
+					let pData = playerData[p];
+					if(pData) {
+						if(pData.score > maxScore) maxScore = pData.score;
+					}
+				}
+
+				for(let p = 0; p < amntP; p++) {
+					let pData = playerData[p];
+					if(!pData) continue;
+
+					scoreCtx.fillStyle = pData.cor;
+					scoreCtx.textAlign = "center";
+					scoreCtx.textBaseline = "middle";
+					scoreCtx.fillRect(baseLeft, bottomBase, pSpaceWidth * 0.6, -barHeight * (pData.score / maxScore));
+					scoreCtx.font = fontSize + "px mono";
+
+					scoreCtx.fillStyle = "white";
+					scoreCtx.fillText(pData.score, baseLeft + (fontSize * 1.5), bottomBase - barHeight * 1.1);
+
+					baseLeft += pSpaceWidth;
+				}
+			}
 		}
 		else {
 			desenharVoz(tela, config, song, tempo, serverConfig.voz, serverConfig.playerColors[serverConfig.voz]);
