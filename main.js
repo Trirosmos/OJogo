@@ -234,6 +234,12 @@ async function handleSuccess() {
 			started = false;
 			backingTrack.currentTime = 0;
 			backingTrack.pause();
+
+			if(sock) {
+				sock.send(JSON.stringify({
+					type: "stop"
+				}));
+			}
 		}
 	});
 
@@ -319,8 +325,8 @@ async function handleSuccess() {
 			ctx.globalAlpha = 0.6;
 			ctx.textAlign = "center";
 			ctx.textBaseline = "middle";
-			//ctx.fillText(atribuiPontos(song, notas, 0, config), tela.width / 2, -24 + tela.height / 2);
-			ctx.fillText(timeStamp0, tela.width / 2, -24 + tela.height / 2);
+			ctx.fillText(atribuiPontos(song, notas, 0, config), tela.width / 2, -24 + tela.height / 2);
+			//ctx.fillText(timeStamp0, tela.width / 2, -24 + tela.height / 2);
 			ctx.restore();
 		}
 

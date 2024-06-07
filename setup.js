@@ -129,6 +129,12 @@ function createSetupControls(wind) {
 				let then = msg.value;
 				timeStamp0 = now - then;
 			}
+
+			if(msg.type === "stop" && !serverConfig.espectador) {
+				started = false;
+				backingTrack.currentTime = 0;
+				backingTrack.pause();
+			}
 		};
 	}
 

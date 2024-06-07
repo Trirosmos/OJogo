@@ -70,6 +70,18 @@ wss.on('connection', function connection(ws, req) {
       });
     }
 
+    if(msg.type === "stop") {
+      wss.clients.forEach(function each(client) {
+        let player = players[client._socket._peername.address];
+        if(player) {
+          client.send(JSON.stringify({
+            type: "stop"
+          }));
+        }
+      });
+    }
+
+
     if(msg.type === "pong") {
       fimPing = new Date();
       players[ip].latency = (fimPing - inicioPing) / 2;
