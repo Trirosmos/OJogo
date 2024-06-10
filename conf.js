@@ -4,10 +4,12 @@ let config = {
 	divisoesNotas: 50,
 	compassosPorTela: 4,
 	preRollBeats: 8,
+	songLegthInMeasures: 45,
+	numberOfPlayers: 3
 };
 let serverConfig;
 
-if(localStorage.getItem("serverConfig")) {
+if(localStorage.getItem("serverConfig") && localStorage.getItem("serverConfig") !== "undefined") {
 	serverConfig = JSON.parse(localStorage.getItem("serverConfig"));
 }
 else {

@@ -166,6 +166,10 @@ function createSetupControls(wind) {
 				playerData.splice(msg.voz, 1);
 				console.log(playerData);
 			}
+
+			if(msg.type === "newSong" && !serverConfig.espectador) {
+				song = msg.song;
+			}
 		};
 	}
 

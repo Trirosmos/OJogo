@@ -6,6 +6,210 @@ let backingTrack = document.createElement("audio");
 backingTrack.src = "bt.mp3";
 document.body.appendChild(backingTrack);
 
+function randNote() {
+	return Math.round(Math.random() * 49);
+}
+
+let colecao = [
+	[{ altura: 0, duracao: 4 },
+	 { altura: 30, duracao: 4 },
+	 { altura: 40, duracao: 4 },
+	 { altura: 49, duracao: 4 }],
+	
+	[{ altura: 0, duracao: 4 },
+	 { altura: 10, duracao: 4 },
+	 { altura: 20, duracao: 4 },
+	 { altura: 30, duracao: 4 }],
+	
+	[{ altura: 4, duracao: 4 },
+	 { altura: 5, duracao: 4 },
+	 { altura: 6, duracao: 4 },
+	 { altura: 8, duracao: 4 }],
+	
+	[{ altura: 2, duracao: 8 },
+	 { altura: -1, duracao: 8 }],
+	
+	[{ altura: 12, duracao: 8 },
+	 { altura: 10, duracao: 8 }],
+	
+	[{ altura: 7, duracao: 8 },
+	 { altura: 3, duracao: 8 }],
+
+	[{ altura: 29, duracao: 8 },
+	 { altura: randNote(), duracao: 8 }],
+	 
+	[{ altura: -1, duracao: 8 },
+	 { altura: randNote(), duracao: 8 }],
+		
+	[{ altura: randNote(), duracao: 8 },
+	 { altura: -1, duracao: 8 }],
+	
+	[{ altura: 20, duracao: 16 }],
+	[{ altura: 12, duracao: 16 }],
+	[{ altura: 13, duracao: 16 }],
+	[{ altura: 40, duracao: 16 }],
+	[{ altura: 29, duracao: 16 }],
+	[{ altura: 10, duracao: 16 }],
+	[{ altura: randNote(), duracao: 16 }],
+	[{ altura: randNote(), duracao: 16 }],
+	[{ altura: randNote(), duracao: 16 }],
+	[{ altura: randNote(), duracao: 16 }],
+
+	[{ altura: randNote(), duracao: 4 },
+	 { altura: randNote(), duracao: 4 },
+	 { altura: randNote(), duracao: 4 },
+	 { altura: randNote(), duracao: 4 }],
+
+	[{ altura: 0, duracao: 4 },
+	 { altura: 10, duracao: 4 },
+	 { altura: 11, duracao: 4 },
+	 { altura: 12, duracao: 4 }],
+
+	[{ altura: 13, duracao: 4 },
+	 { altura: 14, duracao: 4 },
+	 { altura: 16, duracao: 4 },
+	 { altura: 17, duracao: 4 }],
+	
+	[{ altura: 0, duracao: 4 },
+	 { altura: 10, duracao: 4 },
+	 { altura: 20, duracao: 4 },
+	 { altura: 30, duracao: 4 }],
+	
+	[{ altura: -1, duracao: 4 },
+	 { altura: -1, duracao: 4 },
+	 { altura: 20, duracao: 8 },],
+	
+	[{ altura: -1, duracao: 2 },
+	 { altura: 10, duracao: 2 },
+	 { altura: 22, duracao: 2 },
+	 { altura: -1, duracao: 10 },
+	],
+
+	[{ altura: 10,  duracao: 1 },
+		{ altura: 12, duracao: 1 },
+		{ altura: 14, duracao: 1 },
+		{ altura: 16, duracao: 1 },
+		{ altura: 18, duracao: 1 },
+		{ altura: 17, duracao: 1 },
+		{ altura: 15, duracao: 1 },
+		{ altura: 13, duracao: 1 },
+		{ altura: 11, duracao: 1 },
+		{ altura: 8,  duracao: 1 },
+		{ altura: 12, duracao: 1 },
+		{ altura: 16, duracao: 1 },
+		{ altura: 20, duracao: 1 },
+		{ altura: 24, duracao: 1 },
+		{ altura: 28, duracao: 1 },
+		{ altura: 32, duracao: 1 },
+  ],
+
+	[{ altura: randNote(),  duracao: 1 },
+		{ altura: 12, duracao: 1 },
+		{ altura: 14, duracao: 1 },
+		{ altura: 7, duracao: 1 },
+		{ altura: randNote(), duracao: 1 },
+		{ altura: 9, duracao: 1 },
+		{ altura: 10, duracao: 1 },
+		{ altura: 13, duracao: 1 },
+		{ altura: 11, duracao: 1 },
+		{ altura: 30,  duracao: 1 },
+		{ altura: 29, duracao: 1 },
+		{ altura: 28, duracao: 1 },
+		{ altura: 27, duracao: 1 },
+		{ altura: 24, duracao: 1 },
+		{ altura: randNote(), duracao: 1 },
+		{ altura: randNote(), duracao: 1 },
+	],
+	
+	[{ altura: 30, duracao: 8 },
+	 { altura: 28, duracao: 4 },
+	 { altura: 10, duracao: 2 },
+	 { altura: 12, duracao: 2 },
+	],
+
+	[{ altura: 30, duracao: 8 },
+		{ altura: -1, duracao: 4 },
+		{ altura: 10, duracao: 2 },
+		{ altura: 12, duracao: 2 },
+	],
+	
+	[{ altura: 25, duracao: 8 },
+		{ altura: -1, duracao: 4 },
+		{ altura: 10, duracao: 2 },
+		{ altura: -1, duracao: 2 },
+	],
+	
+	[{ altura: 44, duracao: 8 },
+		{ altura: -1, duracao: 4 },
+		{ altura: 5, duracao: 2 },
+		{ altura: 4, duracao: 2 },
+	],
+
+	[{ altura: 10, duracao: 8 },
+		{ altura: 11, duracao: 4 },
+		{ altura: -1, duracao: 2 },
+		{ altura: -1, duracao: 2 },
+	],
+
+	[{ altura: 1,  duracao: 1 },
+		{ altura: -1, duracao: 1 },
+		{ altura: 2, duracao: 1 },
+		{ altura: 3, duracao: 1 },
+		{ altura: 5, duracao: 1 },
+		{ altura: 7, duracao: 1 },
+		{ altura: 11, duracao: 1 },
+		{ altura: -1, duracao: 1 },
+		{ altura: 13, duracao: 1 },
+		{ altura: 17,  duracao: 1 },
+		{ altura: 19, duracao: 1 },
+		{ altura: 23, duracao: 1 },
+		{ altura: -1, duracao: 1 },
+		{ altura: 29, duracao: 1 },
+		{ altura: 31, duracao: 1 },
+		{ altura: -1, duracao: 1 },
+	],
+	
+	[{ altura: 8, duracao: 4 },
+		{ altura: 15, duracao: 8 },
+		{ altura: 13, duracao: 4 },
+	],
+
+	[{ altura: 8, duracao: 4 },
+		{ altura: -1, duracao: 8 },
+		{ altura: 13, duracao: 4 },
+	],
+
+	[{ altura: 8, duracao: 4 },
+		{ altura: -1, duracao: 8 },
+		{ altura: -1, duracao: 2 },
+		{ altura: randNote(), duracao: 2 },
+	],
+];
+
+function gerarMusica(duracao, bpm, vozes) {
+	let musica = {
+		bpm: bpm,
+		compassos: []
+	}
+
+	for(let c = 0; c < duracao; c++) {
+		let compasso = {
+			vozes: []
+		};
+
+		for(let v = 0; v < vozes; v++) {
+			let voz = {};
+			voz.notas = colecao[Math.round(Math.random() * colecao.length - 1)];
+
+			compasso.vozes.push(voz);
+		}
+
+		musica.compassos.push(compasso);
+	}
+
+	return musica;
+}
+
 
 let song = {
 	bpm: 60,
@@ -234,7 +438,7 @@ async function setupWebAudio(flux) {
 }
 
 async function handleSuccess() {
-	window.addEventListener("keydown", function (e) {
+	window.addEventListener("keydown", async function (e) {
 		if(e.key === "a" && serverConfig.espectador) {
 			started = true;
 			let comeco = Date.now();
@@ -244,6 +448,12 @@ async function handleSuccess() {
 			backingTrack.play();
 
 			if(sock) {
+				song = gerarMusica(config.songLegthInMeasures, 60, config.numberOfPlayers);
+				await sock.send(JSON.stringify({
+					type: "newSong",
+					song: song
+				}));
+
 				sock.send(JSON.stringify({
 					type: "start",
 					timestamp: comeco
@@ -377,10 +587,14 @@ async function handleSuccess() {
 					scoreCtx.textAlign = "center";
 					scoreCtx.textBaseline = "middle";
 					scoreCtx.fillRect(baseLeft, bottomBase, pSpaceWidth * 0.6, -barHeight * (pData.score / maxScore));
+					//scoreCtx.fillRect(baseLeft, bottomBase, pSpaceWidth * 0.6, -barHeight);
 					scoreCtx.font = fontSize + "px mono";
 
 					scoreCtx.fillStyle = "white";
 					scoreCtx.fillText(pData.score, baseLeft + (fontSize * 1.5), bottomBase - barHeight * 1.1);
+
+					scoreCtx.font = (fontSize / 1.5) + "px mono";
+					scoreCtx.fillText(pData.nome.slice(0, 10), baseLeft + pSpaceWidth * 0.3, bottomBase * 1.1);
 
 					baseLeft += pSpaceWidth;
 				}

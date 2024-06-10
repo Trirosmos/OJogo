@@ -12,7 +12,7 @@ function getId() {
   return idCounter;
 }
 
-const wss = new WebSocketServer({ port: 8080 });
+const wss = new WebSocketServer({ port: 194 });
 wss.on('connection', function connection(ws, req) {
   let inicioPing = new Date();
   let fimPing;
@@ -80,6 +80,14 @@ wss.on('connection', function connection(ws, req) {
           timestamp: (Number(msg.timestamp) + (client.latency)),
           latency: client.latency
         }));
+      });
+    }
+
+    if(msg.type === "newSong") {
+      wss.clients.forEach(function each(client) {
+        if(!client.espectador) {
+          client.send(JSON.stringify(msg));
+        }
       });
     }
 
